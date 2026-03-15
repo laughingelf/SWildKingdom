@@ -1,0 +1,8 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SawyerAdmin from "../../components/admin/SawyerAdmin.jsx";
+---
+
+<BaseLayout title="Admin | Sawyer’s Wild Kingdom" description="Private admin page for Sawyer’s Wild Kingdom">
+  <SawyerAdmin client:only="react" />
+</BaseLayout>

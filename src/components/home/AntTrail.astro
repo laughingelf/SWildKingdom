@@ -1,0 +1,103 @@
+---
+type Props = {
+  count?: number;
+  speed?: number;
+};
+
+const { count = 14, speed = 18 } = Astro.props as Props;
+
+// Solid black SVG so masking works reliably
+const antSvg = encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <g fill="#000">
+    <ellipse cx="16" cy="32" rx="8" ry="6"/>
+    <ellipse cx="32" cy="32" rx="10" ry="8"/>
+    <ellipse cx="50" cy="32" rx="9" ry="7"/>
+    <circle cx="56" cy="28" r="2"/>
+    <path d="M24 24c-6-8-14-10-20-8" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M24 40c-6 8-14 10-20 8" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40 24c6-8 14-10 20-8" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40 40c6 8 14 10 20 8" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
+`);
+const antDataUrl = `data:image/svg+xml,${antSvg}`;
+---
+
+<div class="trail-wrap" aria-hidden="true">
+  <div class="trail" style={`--speed:${speed}s`}>
+    {Array.from({ length: count }).map((_, i) => (
+      <span class="ant" style={`--i:${i}; --ant:url("${antDataUrl}")`}></span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .trail-wrap {
+    width: 100%;
+    padding: 0.75rem 0 0.25rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .trail {
+    width: min(100% - 2rem, 1100px);
+    height: 46px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg-main) 70%, white 30%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .trail::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle, color-mix(in oklab, var(--text-muted) 55%, transparent 45%) 2px, transparent 3px)
+      0 50% / 18px 10px repeat-x;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .ant {
+    position: absolute;
+    top: 50%;
+    left: calc(-40px - (var(--i) * 44px));
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    opacity: 0.85;
+
+    /* COLOR HERE */
+    background-color: color-mix(in oklab, var(--text-main) 30%, var(--text-muted) 70%);
+
+    /* Mask makes the ant visible (reliable) */
+    -webkit-mask-image: var(--ant);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+
+    mask-image: var(--ant);
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+
+    animation: ant-march var(--speed) linear infinite;
+    animation-delay: calc(var(--i) * -1.25s);
+  }
+
+  .ant:nth-child(3n) { transform: translateY(-50%) rotate(3deg); opacity: 0.75; }
+  .ant:nth-child(4n) { transform: translateY(-50%) rotate(-4deg); opacity: 0.8; }
+  .ant:nth-child(5n) { transform: translateY(-50%) scale(0.95); opacity: 0.7; }
+
+  @keyframes ant-march {
+    from { left: -40px; }
+    to   { left: 110%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ant { animation: none; }
+  }
+</style>

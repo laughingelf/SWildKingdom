@@ -1,0 +1,97 @@
+---
+const siteName = "Sawyer’s Animal Kingdom";
+
+const nav = [
+  { label: "Home", href: "/" },
+  { label: "Facts", href: "/facts" },
+  // later:
+  // { label: "Experiments", href: "/experiments" },
+];
+---
+
+<header class="nav-wrap">
+  <nav class="nav">
+    <a class="brand" href="/" aria-label={`${siteName} home`}>
+      <span class="mark" aria-hidden="true"></span>
+      <span class="name">{siteName}</span>
+    </a>
+
+    <div class="links">
+      {nav.map((item) => (
+        <a class="link" href={item.href}>
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </nav>
+</header>
+
+<style>
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in oklab, var(--bg-main) 85%, white 15%);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav {
+    width: min(100% - 2rem, 1100px);
+    margin-inline: auto;
+    padding: 0.9rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: var(--text-main);
+  }
+
+  .mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 30% 30%, var(--accent) 0 28%, transparent 30%),
+      radial-gradient(circle at 65% 55%, var(--primary) 0 32%, transparent 34%),
+      radial-gradient(circle at 45% 75%, var(--text-main) 0 10%, transparent 12%);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+  }
+
+  .name {
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .links {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .link {
+    text-decoration: none;
+    color: var(--text-main);
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .link:hover {
+    border-color: var(--border);
+    background: rgba(255,255,255,.6);
+  }
+
+  @media (max-width: 520px) {
+    .name { display: none; }
+  }
+</style>

@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../layouts/Baselayout.astro";
+import Hero from "../components/home/Hero.astro";
+import FactList from "../components/facts/FactList";
+
+---
+
+
+<BaseLayout seo={{ title: "Home" }}>
+  
+	<!-- <Hero heroImageSrc="/img/ant-hero.jpg" /> -->
+    <FactList client:only="react" />
+
+</BaseLayout>

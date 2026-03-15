@@ -1,0 +1,368 @@
+---
+import { supabaseServer } from "../../lib/supabaseServer";
+
+type Fact = {
+  id: string;
+  title: string;
+  fact: string;
+  category: string;
+  created_at: string;
+};
+
+type Props = {
+  heroImageSrc?: string;
+  heroImageAlt?: string;
+  title?: string;
+  subtitle?: string;
+};
+
+const {
+  heroImageSrc = "/img/ant-hero.jpg",
+  heroImageAlt = "Wildlife photo",
+  title = "Sawyer’s Wild Kingdom",
+  subtitle = "Wildlife facts and discoveries-written and shared by Sawyer.",
+} = Astro.props as Props;
+
+// Latest published fact
+const { data, error } = await supabaseServer
+  .from("facts")
+  .select("id,title,fact,category,created_at")
+  .eq("published", true)
+  .order("created_at", { ascending: false })
+  .limit(1);
+
+const featured = !error && data?.length ? (data[0] as Fact) : null;
+
+const preview = featured?.fact
+  ? featured.fact.length > 180
+    ? featured.fact.slice(0, 180).trim() + "…"
+    : featured.fact
+  : null;
+---
+
+<section class="hero">
+  <!-- Top banner image -->
+  <div class="banner">
+    <img src={heroImageSrc} alt={heroImageAlt} loading="eager" />
+    <div class="banner-overlay" aria-hidden="true"></div>
+
+    <div class="banner-caption">
+      <span class="cap-pill">Field Photo</span>
+      <span class="cap-text">Nature notes, one fact at a time</span>
+    </div>
+  </div>
+
+  <!-- Info row -->
+  <div class="content">
+    <div class="intro">
+      <p class="kicker">Wildlife • Habitats • Behavior</p>
+      <h1 class="title">{title}</h1>
+      <p class="subtitle">{subtitle}</p>
+
+      <div class="actions">
+        <a class="btn primary" href="/facts">Explore Facts</a>
+        <a class="btn secondary" href="/facts">Browse All</a>
+      </div>
+
+      <dl class="meta" aria-label="Site details">
+        <div class="meta-item">
+          <dt>What it is</dt>
+          <dd>A growing collection of short wildlife facts</dd>
+        </div>
+        <div class="meta-item">
+          <dt>How to use</dt>
+          <dd>Pick a category and learn something new fast</dd>
+        </div>
+        <div class="meta-item">
+          <dt>Updated</dt>
+          <dd>Whenever Sawyer discovers something interesting</dd>
+        </div>
+      </dl>
+    </div>
+
+    <aside class="latest" aria-label="Latest fact">
+      <div class="card">
+        <div class="card-head">
+          <p class="label">Latest published</p>
+          {featured && <span class="badge">{featured.category}</span>}
+        </div>
+
+        <h2 class="card-title">{featured ? featured.title : "No facts published yet"}</h2>
+
+        <p class="card-body">
+          {featured
+            ? preview
+            : "Check back soon-Sawyer is working on her first set of wildlife facts."}
+        </p>
+
+        <div class="card-actions">
+          <a class="link" href="/facts">Read more facts →</a>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <p class="label">About</p>
+        <p class="card-body">
+          Sawyer made this website to share what she learns about the natural world.
+          New facts get added as she discovers them.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 1.75rem 0 1.5rem;
+  }
+
+  /* Banner (full width inside container) */
+  .banner {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #000;
+    box-shadow: 0 22px 70px rgba(0,0,0,.12);
+  }
+
+  .banner img {
+    width: 100%;
+    height: clamp(260px, 38vh, 420px);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    filter: saturate(1.03) contrast(1.02);
+  }
+
+  .banner-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(900px 420px at 20% 0%, rgba(255,255,255,.10) 0%, transparent 60%),
+      linear-gradient(to top, rgba(0,0,0,.38), transparent 60%);
+    pointer-events: none;
+  }
+
+  .banner-caption {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    color: rgba(255,255,255,.9);
+    z-index: 1;
+  }
+
+  .cap-pill {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.18);
+  }
+
+  .cap-text {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  /* Content row */
+  .content {
+    margin-top: 1.1rem;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 1.1rem;
+    align-items: start;
+  }
+
+  .intro {
+    padding: 1.6rem;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: 0 18px 60px rgba(0,0,0,.06);
+  }
+
+  .kicker {
+    margin: 0 0 0.65rem;
+    font-weight: 900;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--text-muted) 70%, var(--primary) 30%);
+  }
+
+  .title {
+    margin: 0;
+    font-size: clamp(2rem, 2.9vw, 2.8rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  .subtitle {
+    margin: 0.85rem 0 1.25rem;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 64ch;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.15rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.74rem 1.05rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    border: 1px solid transparent;
+  }
+
+  .btn.primary {
+    color: white;
+    background: var(--primary);
+    border-color: color-mix(in oklab, var(--primary) 70%, black 30%);
+  }
+
+  .btn.primary:hover { background: var(--primary-dark); }
+
+  .btn.secondary {
+    color: var(--text-main);
+    background: rgba(255,255,255,.75);
+    border-color: var(--border);
+  }
+
+  .btn.secondary:hover { background: rgba(255,255,255,.95); }
+
+  /* Definition list meta */
+  .meta {
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .meta-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0.85rem;
+    align-items: baseline;
+    padding-top: 0.65rem;
+    border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent 30%);
+  }
+
+  .meta-item:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  dt {
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: color-mix(in oklab, var(--text-muted) 72%, var(--text-main) 28%);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-size: 0.98rem;
+  }
+
+  /* Latest column */
+  .latest {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--bg-card);
+    padding: 1.25rem;
+    box-shadow: 0 18px 60px rgba(0,0,0,.06);
+  }
+
+  .card.soft {
+    background: color-mix(in oklab, var(--accent-soft) 26%, white 74%);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .label {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .badge {
+    font-size: 0.78rem;
+    font-weight: 900;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border) 70%);
+    background: rgba(255,255,255,.85);
+    color: var(--primary-dark);
+    white-space: nowrap;
+  }
+
+  .card-title {
+    margin: 0;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+  }
+
+  .card-body {
+    margin: 0.6rem 0 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .link {
+    color: var(--primary-dark);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .link:hover { text-decoration: underline; }
+
+  @media (max-width: 980px) {
+    .content {
+      grid-template-columns: 1fr;
+    }
+
+    .meta-item {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+  }
+</style>

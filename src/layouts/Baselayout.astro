@@ -1,0 +1,114 @@
+---
+import "../styles/global.css";
+import Navbar from "../components/shared/Navbar.astro";
+import Footer from "../components/shared/Footer.astro";
+
+type Seo = {
+  title?: string;         // page title only (we’ll append site name)
+  description?: string;
+  image?: string;         // absolute URL preferred for sharing
+  canonical?: string;     // absolute URL preferred
+  noindex?: boolean;
+};
+
+type Props = {
+  title?: string;         // fallback title if seo.title not provided
+  description?: string;   // fallback description if seo.description not provided
+  seo?: Seo;
+  hero?: boolean;         // if hero handles top padding
+  className?: string;     // optional extra classes for <main>
+};
+
+const {
+  title = "Sawyer’s Animal Kingdom",
+  description = "Fun animal facts, discoveries, and experiments—written and published by Sawyer.",
+  seo = {},
+  hero = false,
+  className = "",
+} = Astro.props as Props;
+
+const site = {
+  name: "Sawyer’s Animal Kingdom",
+  url: "https://example.com",     // TODO: update on deploy
+  defaultOg: "/og/ants-og.png",   // TODO: add later or change
+};
+
+const pageTitle = seo.title ? `${seo.title} | ${site.name}` : `${title} | ${site.name}`;
+const pageDescription = seo.description ?? description;
+
+// Canonical (use Astro.url for path, site.url for origin)
+const canonical = seo.canonical ?? `${site.url}${Astro.url.pathname}`;
+
+// OG image (prefer explicit seo.image, then default)
+const ogImage = seo.image
+  ? seo.image
+  : site.defaultOg.startsWith("http")
+    ? site.defaultOg
+    : `${site.url}${site.defaultOg}`;
+
+const noindex = seo.noindex ?? false;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <Navbar />
+
+      <main class={`container ${hero ? "container--hero" : ""} ${className}`}>
+        <slot />
+      </main>
+
+      <Footer />
+    </div>
+  </body>
+</html>
+
+<style>
+  .app-shell {
+    min-height: 100vh;
+    background: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .container {
+    width: min(100% - 2rem, 1100px);
+    margin-inline: auto;
+    padding: 2rem 0;
+    flex: 1;
+  }
+
+  /* If the hero component handles its own top spacing,
+     we slightly reduce the container top padding */
+  .container--hero {
+    padding-top: 1.25rem;
+  }
+</style>
